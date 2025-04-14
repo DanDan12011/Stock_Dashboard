@@ -70,7 +70,12 @@ export default function CandlestickChart() {
             textAnchor="middle"
             fontSize="10"
           >
-            {dates[i].slice(5)}
+            {dates[i]
+              ? new Date(dates[i]).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+              : ""}
           </text>
         ))}
 

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import stockData from "../data/stockData.json";
-import { StockContext } from "../components/stockcontext"; // update if path differs
+import { StockContext } from "../components/stockcontext";
 
 export const DataContext = createContext();
 
@@ -9,14 +9,54 @@ export function DataProvider({ children }) {
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
-    const allData = stockData[selectedCompany] || [];
+    const rawData = stockData[selectedCompany] || [];
+    const allData = Array.isArray(rawData[0]) ? rawData[0] : rawData;
 
-    // Reverse data if needed (depends on format)
-    const sortedData = [...allData].sort(
+    const cleanedData = allData.map((d) => ({
+      date: d.Date || d.date || "",
+
+      open:
+        d.Open !== undefined
+          ? parseFloat((d.Open + "").replace("$", ""))
+          : d.open !== undefined
+          ? parseFloat((d.open + "").replace("$", ""))
+          : null,
+
+      close:
+        d.Close !== undefined
+          ? parseFloat((d.Close + "").replace("$", ""))
+          : d["Close/Last"] !== undefined
+          ? parseFloat((d["Close/Last"] + "").replace("$", ""))
+          : d.close !== undefined
+          ? parseFloat((d.close + "").replace("$", ""))
+          : null,
+
+      high:
+        d.High !== undefined
+          ? parseFloat((d.High + "").replace("$", ""))
+          : d.high !== undefined
+          ? parseFloat((d.high + "").replace("$", ""))
+          : null,
+
+      low:
+        d.Low !== undefined
+          ? parseFloat((d.Low + "").replace("$", ""))
+          : d.low !== undefined
+          ? parseFloat((d.low + "").replace("$", ""))
+          : null,
+
+      volume:
+        d.Volume !== undefined
+          ? parseInt((d.Volume + "").replace(/,/g, ""))
+          : d.volume !== undefined
+          ? parseInt((d.volume + "").replace(/,/g, ""))
+          : null,
+    }));
+
+    const sortedData = [...cleanedData].sort(
       (a, b) => new Date(a.date) - new Date(b.date)
     );
 
-    // How many days to include
     const rangeMap = {
       "1D": 1,
       "1W": 5,
@@ -25,8 +65,6 @@ export function DataProvider({ children }) {
     };
 
     const days = rangeMap[timePeriod] || 5;
-
-    // Get the last `days` worth of data
     const filtered = sortedData.slice(-days);
 
     setFilteredData(filtered);

@@ -4,6 +4,7 @@ import { DataContext } from "../context/DataContext";
 export default function LineChart() {
   const { filteredData } = useContext(DataContext);
   if (!filteredData.length) return null;
+  console.log("filteredData:", filteredData);
 
   const width = 600;
   const height = 300;
@@ -68,15 +69,20 @@ export default function LineChart() {
           );
         })}
 
-        {[0, Math.floor(dates.length / 2), dates.length - 1].map((i) => (
+        {[0, Math.floor(dates.length / 2), dates.length - 1].map((i, index) => (
           <text
-            key={i}
+            key={`tick-${index}-${i}`}
             x={scaleX(i)}
             y={height - padding + 15}
             textAnchor="middle"
             fontSize="10"
           >
-            {dates[i].slice(5)}
+            {dates[i]
+              ? new Date(dates[i]).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+              : ""}
           </text>
         ))}
 
